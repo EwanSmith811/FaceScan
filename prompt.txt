@@ -1,0 +1,53 @@
+
+
+Goal
+Implement the client-side facial landmark extraction and geometric scoring pipeline. This runs entirely in the browser — no server calls, no external API. The output feeds directly into the final AnalysisResult object.
+
+Files to Implement
+
+lib/mediapipe.ts
+lib/geometric-scoring.ts
+
+
+Function Specs
+lib/mediapipe.ts
+tsexport async function initFaceMesh(): Promise<FaceMesh>
+Configure with locateFile: (file) => \https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}\``, maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5.
+tsexport async function extractLandmarks(
+  faceMesh: FaceMesh,
+  imageElement: HTMLImageElement
+): Promise<NormalizedLandmarkList | null>
+Wrap the FaceMesh callback pattern in a Promise. Return null if no face is detected.
+
+lib/geometric-scoring.ts
+All functions return TraitScore (imported from lib/merge-results.ts). All scores clamped to [1.0, 10.0], one decimal place, using this internal helper:
+tsfunction clamp(value: number, min = 1.0, max = 10.0): number {
+  return Math.round(Math.max(min, Math.min(max, value)) * 10) / 10
+}
+tsexport function computeSymmetry(landmarks: NormalizedLandmarkList): TraitScore
+Paired indices: [33,263], [133,362], [61,291], [172,397], [136,365], [150,379]. For each pair compute Math.abs(landmarks[left].x - (1 - landmarks[right].x)). Mean deviation = d. Score = clamp(10 - (d / 0.02) * 9). Label: "Facial Symmetry". Method: "geometric". Tip: "Facial exercises and proper sleep position can reduce asymmetry over time."
+tsexport function computeCanthalTilt(landmarks: NormalizedLandmarkList): TraitScore
+Inner canthus: 33 (left), 263 (right). Outer canthus: 133 (left), 362 (right). Left tilt = atan2(landmarks[133].y - landmarks[33].y, landmarks[133].x - landmarks[33].x). Right tilt = same pattern for right side. Average in degrees. MediaPipe y increases downward — negative atan2 means outer corner is higher, which is desirable. Score = clamp(5 + (-avgTiltDegrees / 3) * 5). Label: "Canthal Tilt". Method: "geometric". Tip: "Mewing and reducing under-eye puffiness can improve the appearance of canthal tilt."
+tsexport function computeFacialThirds(landmarks: NormalizedLandmarkList): TraitScore
+Hairline: landmark 10. Brow: average y of landmarks 8 and 9. Nose base: landmark 2. Chin: landmark 152. Three vertical distances: top (10→brow), mid (brow→2), lower (2→152). Ideal 1:1:1. deviation = stddev([t1/total, t2/total, t3/total]). Score = clamp(10 - (deviation / 0.05) * 4). Label: "Facial Thirds Harmony". Method: "geometric". Tip: "Hairstyle adjustments can visually balance uneven facial thirds."
+tsexport function computeNoseRatio(landmarks: NormalizedLandmarkList): TraitScore
+Nose width: distance between landmarks 129 and 358. Face width: distance between landmarks 234 and 454. Ratio = nose / face. Ideal = 0.25. Score = clamp(10 - Math.abs(ratio - 0.25) / 0.05 * 3). Label: "Nose-to-Face Ratio". Method: "geometric". Tip: "Contouring along the nose bridge can optically narrow the appearance of nose width."
+tsexport function computeChinProjection(
+  frontLandmarks: NormalizedLandmarkList,
+  sideLandmarks: NormalizedLandmarkList
+): TraitScore
+Use side profile only. Landmark 152 = chin tip. Landmark 2 = subnasale. Horizontal projection = Math.abs(sideLandmarks[152].x - sideLandmarks[2].x). Ideal = 0.08. Score = clamp(10 - Math.abs(projection - 0.08) / 0.04 * 3). Label: "Chin Projection". Method: "geometric". Tip: "Chin exercises and posture correction can improve the appearance of chin projection."
+tsexport function computeAllGeometric(
+  frontLandmarks: NormalizedLandmarkList,
+  sideLandmarks: NormalizedLandmarkList
+): Pick<AnalysisResult['traits'], 'symmetry' | 'canthalTilt' | 'facialThirds' | 'noseRatio' | 'chinProjection'>
+Calls all five functions and returns the combined object. computeChinProjection receives both landmark sets. All others receive frontLandmarks only.
+
+Constraints
+
+Import TraitScore and AnalysisResult from lib/merge-results.ts only — do not redefine types
+Import NormalizedLandmarkList and FaceMesh from @mediapipe/face_mesh
+All scoring runs client-side — no API calls, no async in geometric-scoring.ts
+Do not modify any other files
+Do not implement any UI
+Landmark indices are exact — do not substitute or infer alternatives
