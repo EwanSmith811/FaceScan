@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import AnalysisProfileModal from "@/components/analysis-profile-modal";
@@ -33,6 +33,84 @@ export default function UploadPage() {
   const [sideError, setSideError] = useState<string | null>(null);
   const [frontLoading, setFrontLoading] = useState(false);
   const [sideLoading, setSideLoading] = useState(false);
+
+  const persistNormalizedFile = useCallback(async (
+    file: File,
+    cacheKey: "front" | "side",
+    setFile: React.Dispatch<React.SetStateAction<File | null>>,
+    setError: React.Dispatch<React.SetStateAction<string | null>>,
+    setLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  ) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const normalizedFile = await normalizeUploadFile(file);
+      setFile(normalizedFile);
+      await saveCachedUpload(cacheKey, normalizedFile);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  async function handleFile(
+    file: File,
+    cacheKey: "front" | "side",
+    setFile: React.Dispatch<React.SetStateAction<File | null>>,
+    setError: React.Dispatch<React.SetStateAction<string | null>>,
+    setLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  ) {
+    try {
+      await persistNormalizedFile(
+        file,
+        cacheKey,
+        setFile,
+        setError,
+        setLoading,
+      );
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "We could not process that image. Please try another photo.";
+
+      setFile(null);
+      setError(message);
+
+      try {
+        await clearCachedUpload(cacheKey);
+      } catch {
+        return;
+      }
+    }
+  }
+
+  const restoreCachedFile = useCallback(async (
+    file: File,
+    cacheKey: "front" | "side",
+    setFile: React.Dispatch<React.SetStateAction<File | null>>,
+    setError: React.Dispatch<React.SetStateAction<string | null>>,
+    setLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  ) => {
+    try {
+      await persistNormalizedFile(
+        file,
+        cacheKey,
+        setFile,
+        setError,
+        setLoading,
+      );
+    } catch {
+      setFile(null);
+      setError(null);
+
+      try {
+        await clearCachedUpload(cacheKey);
+      } catch {
+        return;
+      }
+    }
+  }, [persistNormalizedFile]);
 
   useEffect(() => {
     let isActive = true;
@@ -70,85 +148,7 @@ export default function UploadPage() {
     return () => {
       isActive = false;
     };
-  }, []);
-
-  async function persistNormalizedFile(
-    file: File,
-    cacheKey: "front" | "side",
-    setFile: React.Dispatch<React.SetStateAction<File | null>>,
-    setError: React.Dispatch<React.SetStateAction<string | null>>,
-    setLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  ) {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const normalizedFile = await normalizeUploadFile(file);
-      setFile(normalizedFile);
-      await saveCachedUpload(cacheKey, normalizedFile);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleFile(
-    file: File,
-    cacheKey: "front" | "side",
-    setFile: React.Dispatch<React.SetStateAction<File | null>>,
-    setError: React.Dispatch<React.SetStateAction<string | null>>,
-    setLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  ) {
-    try {
-      await persistNormalizedFile(
-        file,
-        cacheKey,
-        setFile,
-        setError,
-        setLoading,
-      );
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "We could not process that image. Please try another photo.";
-
-      setFile(null);
-      setError(message);
-
-      try {
-        await clearCachedUpload(cacheKey);
-      } catch {
-        return;
-      }
-    }
-  }
-
-  async function restoreCachedFile(
-    file: File,
-    cacheKey: "front" | "side",
-    setFile: React.Dispatch<React.SetStateAction<File | null>>,
-    setError: React.Dispatch<React.SetStateAction<string | null>>,
-    setLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  ) {
-    try {
-      await persistNormalizedFile(
-        file,
-        cacheKey,
-        setFile,
-        setError,
-        setLoading,
-      );
-    } catch {
-      setFile(null);
-      setError(null);
-
-      try {
-        await clearCachedUpload(cacheKey);
-      } catch {
-        return;
-      }
-    }
-  }
+  }, [restoreCachedFile]);
 
   const canAnalyze =
     frontFile !== null &&

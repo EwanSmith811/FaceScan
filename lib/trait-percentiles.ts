@@ -113,7 +113,6 @@ export function getPercentileForTrait(
     getAgeAdjustment(traitKey, profile?.ageBand) +
     getRubricAdjustment(traitKey, profile?.rubric);
   const zScore = (score - adjustedMean) / distribution.deviation;
-  const percentile = Math.round(clamp(normalCdf(zScore) * 100, 1, 99));
   const exactTopPercent = clamp(100 - normalCdf(zScore) * 100, 0.001, 99);
   const topPercentLabel = formatTopPercent(exactTopPercent);
 

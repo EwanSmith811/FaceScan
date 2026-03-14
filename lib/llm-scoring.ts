@@ -209,21 +209,6 @@ function extractMessageText(payload: unknown): string {
   return "";
 }
 
-function average(values: number[]): number {
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
-}
-
-function median(values: number[]): number {
-  const sorted = [...values].sort((a, b) => a - b);
-  const middle = Math.floor(sorted.length / 2);
-
-  if (sorted.length % 2 === 0) {
-    return (sorted[middle - 1] + sorted[middle]) / 2;
-  }
-
-  return sorted[middle];
-}
-
 function normalizeTraitMap(input: unknown): TraitMap {
   const source = (input ?? {}) as Record<string, unknown>;
 
