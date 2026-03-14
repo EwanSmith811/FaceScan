@@ -47,8 +47,9 @@ function saveStore(store: CachedAnalysisStore): void {
 export async function createAnalysisCacheKey(
   frontBase64: string,
   sideBase64: string,
+  profilePayload?: string,
 ): Promise<string> {
-  const payload = `${frontBase64}::${sideBase64}`;
+  const payload = `${frontBase64}::${sideBase64}::${profilePayload ?? "no-profile"}`;
   const bytes = new TextEncoder().encode(payload);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
 

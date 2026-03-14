@@ -50,6 +50,7 @@ export default function ProcessingPage() {
         const cacheKey = await createAnalysisCacheKey(
           input.frontBase64,
           input.sideBase64,
+          JSON.stringify(input.profile),
         );
         const cachedTraits = loadCachedAnalysis(cacheKey);
 
@@ -57,7 +58,7 @@ export default function ProcessingPage() {
           const cachedResult = mergeResults(cachedTraits, {
             frontBase64: input.frontBase64,
             sideBase64: input.sideBase64,
-          });
+          }, input.profile);
 
           saveResult(cachedResult);
           clearInput();
@@ -71,6 +72,7 @@ export default function ProcessingPage() {
           body: JSON.stringify({
             frontImage: input.frontBase64,
             sideImage: input.sideBase64,
+            profile: input.profile,
           }),
         }).then(async (response) => {
           const data = (await response.json()) as TraitMap | AnalyzeErrorResponse;
@@ -106,7 +108,7 @@ export default function ProcessingPage() {
         const result = mergeResults(traits, {
           frontBase64: input.frontBase64,
           sideBase64: input.sideBase64,
-        });
+        }, input.profile);
 
         saveResult(result);
         clearInput();

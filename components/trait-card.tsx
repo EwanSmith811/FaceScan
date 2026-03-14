@@ -4,12 +4,15 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 
 import ScoreRing from "@/components/score-ring";
-import type { TraitScore } from "@/lib/merge-results";
+import type { TraitKey, TraitScore } from "@/lib/merge-results";
+import type { AnalysisProfile } from "@/lib/session";
+import { getPercentileForTrait } from "@/lib/trait-percentiles";
 
 interface TraitCardProps {
-  traitKey: string;
+  traitKey: TraitKey;
   trait: TraitScore;
   index: number;
+  profile: AnalysisProfile | null;
 }
 
 const descriptions: Record<string, string> = {
@@ -28,8 +31,14 @@ const descriptions: Record<string, string> = {
   browRidge: "The framing, thickness, and position of your brow above the eyes",
 };
 
-export default function TraitCard({ traitKey, trait, index }: TraitCardProps) {
+export default function TraitCard({
+  traitKey,
+  trait,
+  index,
+  profile,
+}: TraitCardProps) {
   const [tipOpen, setTipOpen] = useState(false);
+  const percentile = getPercentileForTrait(traitKey, trait.score, profile);
 
   return (
     <motion.div
@@ -48,6 +57,9 @@ export default function TraitCard({ traitKey, trait, index }: TraitCardProps) {
           <p className="text-sm font-semibold text-white">{trait.label}</p>
           <p className="text-xs leading-relaxed text-zinc-500">
             {descriptions[traitKey]}
+          </p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-amber-500/80">
+            Top {percentile.topPercentLabel}% of {percentile.comparisonLabel}
           </p>
         </div>
       </div>

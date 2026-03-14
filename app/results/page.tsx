@@ -184,6 +184,7 @@ export default function ResultsPage() {
           <TraitCard
             index={i}
             key={key}
+            profile={currentResult.profile}
             trait={currentResult.traits[key]}
             traitKey={key}
           />

@@ -1,10 +1,15 @@
 import { scoreAllTraits } from "@/lib/llm-scoring";
+import type { AnalysisAgeBand, AnalysisRubric } from "@/lib/session";
 
 export const runtime = "nodejs";
 
 type AnalyzeRequestBody = {
   frontImage?: string;
   sideImage?: string;
+  profile?: {
+    rubric?: AnalysisRubric;
+    ageBand?: AnalysisAgeBand;
+  } | null;
 };
 
 type RateLimitEntry = {
@@ -17,6 +22,13 @@ const MAX_IMAGE_BYTES = Math.floor(2.5 * 1024 * 1024);
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 8;
 const BASE64_PATTERN = /^[A-Za-z0-9+/=]+$/;
+const VALID_RUBRICS = new Set<AnalysisRubric>(["male", "female", "universal"]);
+const VALID_AGE_BANDS = new Set<AnalysisAgeBand>([
+  "18-24",
+  "25-34",
+  "35-44",
+  "45+",
+]);
 const globalStore = globalThis as typeof globalThis & {
   __facescanRateLimit?: Map<string, RateLimitEntry>;
 };
@@ -110,6 +122,27 @@ function validateImagePayload(image: string | undefined): string | null {
   return null;
 }
 
+function validateProfile(
+  profile: AnalyzeRequestBody["profile"],
+): { rubric: AnalysisRubric; ageBand: AnalysisAgeBand } | null {
+  if (profile == null) {
+    return null;
+  }
+
+  const rubric = profile.rubric;
+  const ageBand = profile.ageBand;
+
+  if (!rubric || !ageBand) {
+    return null;
+  }
+
+  if (!VALID_RUBRICS.has(rubric) || !VALID_AGE_BANDS.has(ageBand)) {
+    return null;
+  }
+
+  return { rubric, ageBand };
+}
+
 export async function POST(req: Request): Promise<Response> {
   try {
     if (!hasTrustedOrigin(req)) {
@@ -157,6 +190,7 @@ export async function POST(req: Request): Promise<Response> {
     const body = (await req.json()) as AnalyzeRequestBody;
     const frontImage = body.frontImage?.trim();
     const sideImage = body.sideImage?.trim();
+    const profile = validateProfile(body.profile);
     const frontError = validateImagePayload(frontImage);
     const sideError = validateImagePayload(sideImage);
 
@@ -167,7 +201,7 @@ export async function POST(req: Request): Promise<Response> {
       );
     }
 
-    const scores = await scoreAllTraits(frontImage!, sideImage!);
+    const scores = await scoreAllTraits(frontImage!, sideImage!, profile);
 
     return Response.json(scores, {
       status: 200,

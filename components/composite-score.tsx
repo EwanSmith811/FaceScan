@@ -25,7 +25,7 @@ function getInterpretation(score: number) {
   if (score >= 6.0) {
     return { className: "bg-zinc-800 text-zinc-300", label: "Mogs Chuds" };
   }
-  if (score >= 5.5) {
+  if (score >= 5.3) {
     return {
       className: "bg-orange-950 text-orange-400",
       label: "Bouse Squid",

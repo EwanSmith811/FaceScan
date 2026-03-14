@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import AnalysisProfileModal from "@/components/analysis-profile-modal";
 import UploadZone from "@/components/upload-zone";
 import { GLSLHills } from "@/components/ui/glsl-hills";
 import {
   fileToBase64,
   normalizeUploadFile,
 } from "@/lib/image-processing";
-import { saveInput } from "@/lib/session";
+import { type AnalysisProfile, saveInput } from "@/lib/session";
 import {
   clearCachedUpload,
   clearCachedUploads,
@@ -23,6 +24,11 @@ export default function UploadPage() {
   const router = useRouter();
   const [frontFile, setFrontFile] = useState<File | null>(null);
   const [sideFile, setSideFile] = useState<File | null>(null);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [analysisProfile, setAnalysisProfile] = useState<AnalysisProfile>({
+    rubric: "male",
+    ageBand: "18-24",
+  });
   const [frontError, setFrontError] = useState<string | null>(null);
   const [sideError, setSideError] = useState<string | null>(null);
   const [frontLoading, setFrontLoading] = useState(false);
@@ -150,7 +156,7 @@ export default function UploadPage() {
     !frontLoading &&
     !sideLoading;
 
-  const handleAnalyze = async () => {
+  const startAnalysis = async (profile: AnalysisProfile | null) => {
     if (frontFile === null || sideFile === null) {
       return;
     }
@@ -175,6 +181,7 @@ export default function UploadPage() {
       saveInput({
         frontBase64,
         sideBase64,
+        profile,
       });
 
       router.push("/processing");
@@ -190,6 +197,14 @@ export default function UploadPage() {
       setFrontLoading(false);
       setSideLoading(false);
     }
+  };
+
+  const handleAnalyze = () => {
+    if (!canAnalyze) {
+      return;
+    }
+
+    setProfileModalOpen(true);
   };
 
   return (
@@ -293,7 +308,7 @@ export default function UploadPage() {
                 : "cursor-not-allowed border border-white/10 bg-white/5 text-zinc-500"
             }`}
             disabled={!canAnalyze}
-            onClick={() => void handleAnalyze()}
+            onClick={handleAnalyze}
             style={
               canAnalyze
                 ? {
@@ -315,6 +330,22 @@ export default function UploadPage() {
           </p>
         </section>
       </div>
+
+      <AnalysisProfileModal
+        isOpen={profileModalOpen}
+        isSubmitting={frontLoading || sideLoading}
+        onChange={setAnalysisProfile}
+        onClose={() => setProfileModalOpen(false)}
+        onContinueWithoutProfile={() => {
+          setProfileModalOpen(false);
+          void startAnalysis(null);
+        }}
+        onSubmit={() => {
+          setProfileModalOpen(false);
+          void startAnalysis(analysisProfile);
+        }}
+        value={analysisProfile}
+      />
     </main>
   );
 }

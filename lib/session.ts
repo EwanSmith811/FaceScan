@@ -1,8 +1,17 @@
 import type { AnalysisResult } from "@/lib/merge-results";
 
+export type AnalysisRubric = "male" | "female" | "universal";
+export type AnalysisAgeBand = "18-24" | "25-34" | "35-44" | "45+";
+
+export interface AnalysisProfile {
+  rubric: AnalysisRubric;
+  ageBand: AnalysisAgeBand;
+}
+
 export interface ProcessingInput {
   frontBase64: string;
   sideBase64: string;
+  profile: AnalysisProfile | null;
 }
 
 const RESULT_STORAGE_KEY = "facescan_result";
