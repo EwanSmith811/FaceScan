@@ -41,11 +41,11 @@ Scoring guidance:
 - Score each trait independently. Do not let a generally good or generally weak face drag the other traits toward the same score.
 - Use meaningful variation when the photos support it. A visibly weak trait should stand out as weak relative to the others.
 - Reward clearly strong traits highly when the photo clearly supports it, even if the overall face has some weaknesses.
-- Only score below 4.0 when the trait is clearly and significantly below average.
-- Do not be harsh. Ignore small asymmetries, normal variation, minor camera distortion, and mild lighting flaws.
+- Do not be overly harsh. Ignore small asymmetries, normal variation, minor camera distortion, and mild lighting flaws.
 - If the photos are imperfect, avoid overconfidence, but do not force every score back to the middle.
 - Compare each trait to a broad population standard for that specific trait, not to the subject's overall appearance.
 - Jawline should reflect mandibular definition, gonial angle clarity, lower-face structure, and neck-jaw separation.
+- Strong and sepereated jawlines should score extremely well, and less visible, blended, or weak jawlines should score progressively lower.
 - Cheekbone should reflect prominence, width contribution, and visible projection rather than overall leanness alone.
 - ChinProjection should rely heavily on the side profile.
 - Skin should reflect visible clarity, smoothness, and evenness of complexion as best as the photos allow.

@@ -13,7 +13,7 @@ interface CompositeScoreProps {
 }
 
 function getInterpretation(score: number) {
-  if (score >= 8.0) {
+  if (score >= 7.7) {
     return { className: "bg-green-950 text-green-400", label: "Touse Mogger" };
   }
   if (score >= 6.7) {
