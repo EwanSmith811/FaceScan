@@ -38,12 +38,21 @@ Return ONLY valid JSON and match this schema exactly:
 Scoring guidance:
 - Use a 1.0 to 10.0 scale with one decimal place.
 - Use true tenth-place variation when justified. Do not round most scores to whole numbers or ".5".
+- Do not treat 6.5 to 7.0 as a safe default range. Use the full scale when the evidence supports it.
 - Score each trait independently. Do not let a generally good or generally weak face drag the other traits toward the same score.
 - Use meaningful variation when the photos support it. A visibly weak trait should stand out as weak relative to the others.
 - Reward clearly strong traits highly when the photo clearly supports it, even if the overall face has some weaknesses.
-- Do not be overly harsh. Ignore small asymmetries, normal variation, minor camera distortion, and mild lighting flaws.
+- Be stricter about genuinely weak structure and more generous about genuinely strong structure.
+- Ignore small asymmetries, normal variation, minor camera distortion, and mild lighting flaws.
 - If the photos are imperfect, avoid overconfidence, but do not force every score back to the middle.
 - Compare each trait to a broad population standard for that specific trait, not to the subject's overall appearance.
+- Use these anchors:
+  1.0-2.9 = severely weak for that trait
+  3.0-4.4 = clearly below average
+  4.5-5.9 = average to mildly below average
+  6.0-6.9 = above average
+  7.0-8.4 = clearly strong
+  8.5-10.0 = exceptional or rare
 - Jawline should reflect mandibular definition, gonial angle clarity, lower-face structure, and neck-jaw separation.
 - Strong and sepereated jawlines should score extremely well, and less visible, blended, or weak jawlines should score progressively lower.
 - Cheekbone should reflect prominence, width contribution, and visible projection rather than overall leanness alone.
@@ -60,15 +69,17 @@ function clamp(value: number, min = 1, max = 10): number {
   return Math.round(Math.max(min, Math.min(max, value)) * 10) / 10;
 }
 
+function expandScoreSpread(score: number): number {
+  const center = 6;
+  const distance = score - center;
+  const amplified = center + distance * 1.6;
+  return clamp(amplified);
+}
+
 function normalizeScore(rawScore: unknown): number {
   const numeric = Number(rawScore);
   const bounded = Number.isFinite(numeric) ? clamp(numeric) : 6;
-
-  if (bounded >= 3.5 && bounded < 4) {
-    return 4;
-  }
-
-  return bounded;
+  return expandScoreSpread(bounded);
 }
 
 function normalizeTip(value: unknown): string {

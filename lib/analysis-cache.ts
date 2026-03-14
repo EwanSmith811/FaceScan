@@ -1,6 +1,6 @@
 import type { TraitMap } from "@/lib/merge-results";
 
-const CACHE_STORAGE_KEY = "facescan_analysis_cache_v1";
+const CACHE_STORAGE_KEY = "facescan_analysis_cache_v2";
 const MAX_CACHE_ENTRIES = 12;
 
 type CachedAnalysisEntry = {
