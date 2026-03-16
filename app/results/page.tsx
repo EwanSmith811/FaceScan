@@ -10,6 +10,8 @@ import { GLSLHills } from "@/components/ui/glsl-hills";
 import type { AnalysisResult } from "@/lib/merge-results";
 import { clearResult, loadResult } from "@/lib/session";
 
+const GOLD_HILLS_COLOR: [number, number, number] = [0.93, 0.6, 0.14];
+
 const traitOrder = [
   "symmetry",
   "canthalTilt",
@@ -79,11 +81,11 @@ export default function ResultsPage() {
     <main className="relative min-h-screen overflow-hidden bg-zinc-950">
       <div className="pointer-events-none absolute inset-0 opacity-55">
         <GLSLHills
-          color={[1, 0.82, 0.18]}
+          color={GOLD_HILLS_COLOR}
           height="100%"
           width="100%"
           speed={0.35}
-          brightness={1.65}
+          brightness={2.5}
         />
       </div>
 
@@ -151,6 +153,15 @@ export default function ResultsPage() {
       <div className="relative z-10">
         <CompositeScore score={currentResult.composite} />
       </div>
+
+      {currentResult.qualityWarning ? (
+        <div className="relative z-10 mx-auto mb-8 max-w-3xl px-6">
+          <p className="rounded-xl border border-white/8 bg-white/[0.03] px-4 py-3 text-center text-xs leading-5 text-zinc-400">
+            {currentResult.qualityWarning} Better results would likely come from
+            a clearer, better-lit photo.
+          </p>
+        </div>
+      ) : null}
 
       <div className="relative z-10 mx-auto mb-10 grid max-w-4xl grid-cols-1 gap-4 px-6 md:grid-cols-2">
         <div className="overflow-hidden rounded-2xl border border-amber-700/20 bg-zinc-900/95 shadow-[0_18px_40px_rgba(0,0,0,0.22)]">

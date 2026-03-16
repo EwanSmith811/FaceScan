@@ -18,12 +18,14 @@ import {
   saveCachedUpload,
 } from "@/lib/upload-cache";
 
-const GOLD_HILLS_COLOR: [number, number, number] = [0.71, 0.33, 0.04];
+const GOLD_HILLS_COLOR: [number, number, number] = [0.93, 0.6, 0.14];
 
 export default function UploadPage() {
   const router = useRouter();
   const [frontFile, setFrontFile] = useState<File | null>(null);
   const [sideFile, setSideFile] = useState<File | null>(null);
+  const [frontQualityWarning, setFrontQualityWarning] = useState<string | null>(null);
+  const [sideQualityWarning, setSideQualityWarning] = useState<string | null>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [analysisProfile, setAnalysisProfile] = useState<AnalysisProfile>({
     rubric: "male",
@@ -38,6 +40,7 @@ export default function UploadPage() {
     file: File,
     cacheKey: "front" | "side",
     setFile: React.Dispatch<React.SetStateAction<File | null>>,
+    setQualityWarning: React.Dispatch<React.SetStateAction<string | null>>,
     setError: React.Dispatch<React.SetStateAction<string | null>>,
     setLoading: React.Dispatch<React.SetStateAction<boolean>>,
   ) => {
@@ -45,9 +48,10 @@ export default function UploadPage() {
     setError(null);
 
     try {
-      const normalizedFile = await normalizeUploadFile(file);
-      setFile(normalizedFile);
-      await saveCachedUpload(cacheKey, normalizedFile);
+      const preparedFile = await normalizeUploadFile(file);
+      setFile(preparedFile.file);
+      setQualityWarning(preparedFile.qualityWarning);
+      await saveCachedUpload(cacheKey, preparedFile.file);
     } finally {
       setLoading(false);
     }
@@ -57,6 +61,7 @@ export default function UploadPage() {
     file: File,
     cacheKey: "front" | "side",
     setFile: React.Dispatch<React.SetStateAction<File | null>>,
+    setQualityWarning: React.Dispatch<React.SetStateAction<string | null>>,
     setError: React.Dispatch<React.SetStateAction<string | null>>,
     setLoading: React.Dispatch<React.SetStateAction<boolean>>,
   ) {
@@ -65,6 +70,7 @@ export default function UploadPage() {
         file,
         cacheKey,
         setFile,
+        setQualityWarning,
         setError,
         setLoading,
       );
@@ -75,6 +81,7 @@ export default function UploadPage() {
           : "We could not process that image. Please try another photo.";
 
       setFile(null);
+      setQualityWarning(null);
       setError(message);
 
       try {
@@ -89,6 +96,7 @@ export default function UploadPage() {
     file: File,
     cacheKey: "front" | "side",
     setFile: React.Dispatch<React.SetStateAction<File | null>>,
+    setQualityWarning: React.Dispatch<React.SetStateAction<string | null>>,
     setError: React.Dispatch<React.SetStateAction<string | null>>,
     setLoading: React.Dispatch<React.SetStateAction<boolean>>,
   ) => {
@@ -97,11 +105,13 @@ export default function UploadPage() {
         file,
         cacheKey,
         setFile,
+        setQualityWarning,
         setError,
         setLoading,
       );
     } catch {
       setFile(null);
+      setQualityWarning(null);
       setError(null);
 
       try {
@@ -126,6 +136,7 @@ export default function UploadPage() {
             cachedFront,
             "front",
             setFrontFile,
+            setFrontQualityWarning,
             setFrontError,
             setFrontLoading,
           );
@@ -136,6 +147,7 @@ export default function UploadPage() {
             cachedSide,
             "side",
             setSideFile,
+            setSideQualityWarning,
             setSideError,
             setSideLoading,
           );
@@ -182,6 +194,7 @@ export default function UploadPage() {
         frontBase64,
         sideBase64,
         profile,
+        qualityWarning: frontQualityWarning ?? sideQualityWarning ?? null,
       });
 
       router.push("/processing");
@@ -215,7 +228,7 @@ export default function UploadPage() {
           width="100%"
           speed={0.35}
           color={GOLD_HILLS_COLOR}
-          brightness={3}
+          brightness={2.5}
         />
       </div>
 
@@ -278,6 +291,7 @@ export default function UploadPage() {
                   file,
                   "front",
                   setFrontFile,
+                  setFrontQualityWarning,
                   setFrontError,
                   setFrontLoading,
                 )
@@ -294,6 +308,7 @@ export default function UploadPage() {
                   file,
                   "side",
                   setSideFile,
+                  setSideQualityWarning,
                   setSideError,
                   setSideLoading,
                 )

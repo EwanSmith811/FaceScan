@@ -32,8 +32,12 @@ export default function ProcessingOverlay() {
       />
 
       <div className="text-center">
-        <p className="text-sm tracking-wide text-zinc-400">{messages[messageIndex]}</p>
-        <p className="mt-2 text-xs text-zinc-700">This takes about 10–15 seconds</p>
+        <p className="text-sm tracking-wide text-zinc-400">
+          {messages[messageIndex]}
+        </p>
+        <p className="mt-2 text-xs text-zinc-700">
+          This takes about 10-15 seconds
+        </p>
       </div>
 
       <div className="h-px w-48 rounded-full bg-zinc-800">

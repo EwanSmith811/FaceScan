@@ -17,8 +17,8 @@ type RateLimitEntry = {
   resetAt: number;
 };
 
-const MAX_BODY_BYTES = 6 * 1024 * 1024;
-const MAX_IMAGE_BYTES = Math.floor(2.5 * 1024 * 1024);
+const MAX_BODY_BYTES = 20 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 8;
 const BASE64_PATTERN = /^[A-Za-z0-9+/=]+$/;
@@ -116,7 +116,7 @@ function validateImagePayload(image: string | undefined): string | null {
   }
 
   if (decodedSizeFromBase64(normalized) > MAX_IMAGE_BYTES) {
-    return "Each photo must stay under 2.5 MB after compression.";
+    return "Each photo must stay under 8 MB after upload.";
   }
 
   return null;
@@ -212,6 +212,19 @@ export async function POST(req: Request): Promise<Response> {
     });
   } catch (error) {
     console.error("FaceScan analysis failed", error);
+
+    if (
+      error instanceof Error &&
+      error.message === "Missing OPENAI_API_KEY"
+    ) {
+      return Response.json(
+        {
+          error:
+            "Server configuration is incomplete. Set OPENAI_API_KEY before running analysis.",
+        },
+        { status: 503 },
+      );
+    }
 
     return Response.json(
       { error: "Analysis failed. Please try again with two clear photos." },
