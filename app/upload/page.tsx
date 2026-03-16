@@ -215,6 +215,7 @@ export default function UploadPage() {
           width="100%"
           speed={0.35}
           color={GOLD_HILLS_COLOR}
+          brightness={3}
         />
       </div>
 

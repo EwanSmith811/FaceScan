@@ -79,10 +79,11 @@ export default function ResultsPage() {
     <main className="relative min-h-screen overflow-hidden bg-zinc-950">
       <div className="pointer-events-none absolute inset-0 opacity-55">
         <GLSLHills
-          color={[0.71, 0.33, 0.04]}
+          color={[1, 0.82, 0.18]}
           height="100%"
           width="100%"
           speed={0.35}
+          brightness={1.65}
         />
       </div>
 

@@ -10,6 +10,7 @@ type GLSLHillsProps = {
   planeSize?: number;
   speed?: number;
   color?: [number, number, number];
+  brightness?: number;
 };
 
 class Plane {
@@ -17,15 +18,24 @@ class Plane {
   mesh: THREE.Mesh<THREE.PlaneGeometry, THREE.RawShaderMaterial>;
   time: number;
 
-  constructor(speed: number, planeSize: number, color: [number, number, number]) {
+  constructor(
+    speed: number,
+    planeSize: number,
+    color: [number, number, number],
+    brightness: number,
+  ) {
     this.uniforms = {
       time: { type: "f", value: 0 },
     };
-    this.mesh = this.createMesh(planeSize, color);
+    this.mesh = this.createMesh(planeSize, color, brightness);
     this.time = speed;
   }
 
-  createMesh(planeSize: number, color: [number, number, number]) {
+  createMesh(
+    planeSize: number,
+    color: [number, number, number],
+    brightness: number,
+  ) {
     return new THREE.Mesh(
       new THREE.PlaneGeometry(planeSize, planeSize, planeSize, planeSize),
       new THREE.RawShaderMaterial({
@@ -144,7 +154,7 @@ class Plane {
           varying vec3 vPosition;
 
           void main(void) {
-            float opacity = (96.0 - length(vPosition)) / 256.0 * 0.6;
+            float opacity = (96.0 - length(vPosition)) / 256.0 * 0.6 * ${brightness.toFixed(2)};
             vec3 color = vec3(${color[0]}, ${color[1]}, ${color[2]});
             gl_FragColor = vec4(color, opacity);
           }
@@ -166,6 +176,7 @@ const GLSLHills = ({
   planeSize = 256,
   speed = 0.5,
   color = [0.72, 0.12, 0.12],
+  brightness = 1,
 }: GLSLHillsProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameRef = useRef<number | null>(null);
@@ -189,7 +200,7 @@ const GLSLHills = ({
       10000,
     );
     const clock = new THREE.Clock();
-    const plane = new Plane(speed, planeSize, color);
+    const plane = new Plane(speed, planeSize, color, brightness);
 
     const resize = () => {
       canvas.width = window.innerWidth;
@@ -230,7 +241,7 @@ const GLSLHills = ({
       plane.mesh.material.dispose();
       renderer.dispose();
     };
-  }, [cameraZ, color, planeSize, speed]);
+  }, [brightness, cameraZ, color, planeSize, speed]);
 
   return (
     <div style={{ position: "relative", width, height }}>
