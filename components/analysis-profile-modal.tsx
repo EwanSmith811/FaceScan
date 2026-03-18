@@ -66,7 +66,7 @@ export default function AnalysisProfileModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-4 sm:py-8">
       <button
         aria-label="Close profile preferences"
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
@@ -74,7 +74,7 @@ export default function AnalysisProfileModal({
         type="button"
       />
 
-      <section className="relative z-10 w-full max-w-xl overflow-hidden rounded-[1.75rem] border border-white/10 bg-[rgba(10,10,12,0.96)] p-6 shadow-[0_30px_120px_rgba(0,0,0,0.65)]">
+      <section className="relative z-10 max-h-[calc(100dvh-2rem)] w-full max-w-xl overflow-y-auto overscroll-contain rounded-[1.75rem] border border-white/10 bg-[rgba(10,10,12,0.96)] p-5 shadow-[0_30px_120px_rgba(0,0,0,0.65)] sm:max-h-[calc(100dvh-4rem)] sm:p-6">
         <div
           className="pointer-events-none absolute inset-x-0 top-0 h-32"
           style={{
