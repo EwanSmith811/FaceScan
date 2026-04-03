@@ -2,13 +2,11 @@
 
 const MEGABYTE = 1024 * 1024;
 
-export const MAX_UPLOAD_BYTES = 8 * MEGABYTE;
+export const MAX_UPLOAD_BYTES = 20 * MEGABYTE;
 export const MAX_IMAGE_DIMENSION = 1600;
 export const JPEG_QUALITY = 0.86;
 export const FILE_INPUT_ACCEPT =
   "image/*,.heic,.heif";
-const MIN_RECOMMENDED_DIMENSION = 500;
-const MIN_RECOMMENDED_BYTES = 40 * 1024;
 
 const ACCEPTED_IMAGE_TYPES = new Set<string>([
   "image/jpeg",
@@ -118,68 +116,35 @@ export function validateUploadFile(file: File): string | null {
     return "Please upload an image file.";
   }
 
-  return null;
-}
-
-async function analyzePhotoQuality(file: Blob): Promise<string | null> {
-  try {
-    const image = await loadImage(file);
-    const shortestSide = Math.min(image.width, image.height);
-
-    if (shortestSide < MIN_RECOMMENDED_DIMENSION) {
-      return "These photos look a little low-resolution.";
-    }
-  } catch {
-    return "These photos may be harder to read cleanly.";
-  }
-
-  if (file.size < MIN_RECOMMENDED_BYTES) {
-    return "These photos look a little heavily compressed.";
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return "Please keep each photo under 20 MB.";
   }
 
   return null;
 }
 
-export async function normalizeUploadFile(
-  file: File,
-): Promise<{ file: File; qualityWarning: string | null }> {
+export async function normalizeUploadFile(file: File): Promise<File> {
   const error = validateUploadFile(file);
 
   if (error) {
     throw new Error(error);
   }
 
-  const qualityWarning = await analyzePhotoQuality(file);
   let source: Blob = file;
 
   if (isHeicFile(file)) {
     try {
       source = await convertHeicToJpeg(file);
     } catch {
-      return {
-        file,
-        qualityWarning:
-          qualityWarning ?? "These photos needed fallback processing.",
-      };
+      return file;
     }
   }
 
   try {
     const normalizedFile = await renderAsJpeg(source, file.name);
-
-    return {
-      file: normalizedFile.size > MAX_UPLOAD_BYTES ? file : normalizedFile,
-      qualityWarning:
-        normalizedFile.size > MAX_UPLOAD_BYTES
-          ? qualityWarning ?? "These photos are unusually large."
-          : qualityWarning,
-    };
+    return normalizedFile.size > MAX_UPLOAD_BYTES ? file : normalizedFile;
   } catch {
-    return {
-      file,
-      qualityWarning:
-        qualityWarning ?? "These photos could not be optimized cleanly.",
-    };
+    return file;
   }
 }
 

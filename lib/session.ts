@@ -12,7 +12,6 @@ export interface ProcessingInput {
   frontBase64: string;
   sideBase64: string;
   profile: AnalysisProfile | null;
-  qualityWarning: string | null;
 }
 
 const RESULT_STORAGE_KEY = "facescan_result";

@@ -58,7 +58,7 @@ export default function ProcessingPage() {
           const cachedResult = mergeResults(cachedTraits, {
             frontBase64: input.frontBase64,
             sideBase64: input.sideBase64,
-          }, input.profile, input.qualityWarning);
+          }, input.profile);
 
           saveResult(cachedResult);
           clearInput();
@@ -108,7 +108,7 @@ export default function ProcessingPage() {
         const result = mergeResults(traits, {
           frontBase64: input.frontBase64,
           sideBase64: input.sideBase64,
-        }, input.profile, input.qualityWarning);
+        }, input.profile);
 
         saveResult(result);
         clearInput();

@@ -27,7 +27,6 @@ export interface AnalysisResult {
   traits: TraitMap;
   timestamp: number;
   profile: AnalysisProfile | null;
-  qualityWarning: string | null;
   images: {
     frontBase64: string;
     sideBase64: string;
@@ -54,14 +53,12 @@ export function mergeResults(
   traits: TraitMap,
   images: AnalysisResult["images"],
   profile: AnalysisProfile | null,
-  qualityWarning: string | null,
 ): AnalysisResult {
   return {
     composite: computeComposite(traits),
     traits,
     timestamp: Date.now(),
     profile,
-    qualityWarning,
     images,
   };
 }

@@ -17,8 +17,9 @@ type RateLimitEntry = {
   resetAt: number;
 };
 
-const MAX_BODY_BYTES = 20 * 1024 * 1024;
-const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+const MEGABYTE = 1024 * 1024;
+const MAX_BODY_BYTES = 50 * MEGABYTE;
+const MAX_IMAGE_BYTES = 20 * MEGABYTE;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 8;
 const BASE64_PATTERN = /^[A-Za-z0-9+/=]+$/;
@@ -116,7 +117,7 @@ function validateImagePayload(image: string | undefined): string | null {
   }
 
   if (decodedSizeFromBase64(normalized) > MAX_IMAGE_BYTES) {
-    return "Each photo must stay under 8 MB after upload.";
+    return "Each photo must stay under 20 MB after upload.";
   }
 
   return null;
